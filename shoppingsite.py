@@ -9,6 +9,7 @@ Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 
 from flask import Flask, render_template, redirect, flash, session
 import jinja2
+from flask_debugtoolbar import DebugToolbarExtension
 
 import melons
 
@@ -60,11 +61,30 @@ def show_melon(melon_id):
 def show_shopping_cart():
     """Display content of shopping cart."""
 
+    # import pdb; set_trace()
+    cart_contents = session['cart']
     # TODO: Display the contents of the shopping cart.
 
+    import pdb; pdb.set_trace()
+
+    grand_total = 0
+
+    melon_objects = []
+    for melon in cart_contents:
+        this_melon = melons.get_by_id(melon)
+        # name = this_melon.common_name
+        price = float(this_melon.price)
+        this_melon.quantity = cart_contents[melon]
+        this_melon.cart_total = price * int(count)
+        melon_objects.append(this_melon)
+        grand_total += total
+
+
+
+
+
     # The logic here will be something like:
-    #
-    # - get the cart dictionary from the session
+    # melon name, quantity of that melon, price per melon, price total for type of melon
     # - create a list to hold melon objects and a variable to hold the total
     #   cost of the order
     # - loop over the cart dictionary, and for each melon id:
@@ -79,6 +99,8 @@ def show_shopping_cart():
     # been added to the session
 
     return render_template("cart.html")
+
+\
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -106,7 +128,8 @@ def add_to_cart(melon_id):
         session["cart"] = {}
         session["cart"][melon_id] = session['cart'].get(melon_id, 0) + 1
 
-    return render_template("cart.html")
+    # return render_template("cart.html")
+    return redirect("/cart")
 
 
 @app.route("/login", methods=["GET"])
@@ -153,4 +176,6 @@ def checkout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.debug = True
+    DebugToolbarExtension(app)
+    app.run()
